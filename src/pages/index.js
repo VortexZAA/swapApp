@@ -86,15 +86,7 @@ export default function App() {
       slippageAmount,
       Math.floor(Date.now() / 1000 + (deadlineMinutes * 60)),
       signerAddress
-    ).then(data => {
-      setTransaction(data[0])
-      setOutputAmount(data[1])
-      setRatio(data[2])
-      setLoading(false)
-    }).catch(error => {
-      console.log(error)
-      setLoading(false)
-    })
+    )
   }
 
 

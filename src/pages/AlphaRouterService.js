@@ -11,9 +11,9 @@ const ERC20ABI = require("./abi.json");
 
 const V3_SWAP_ROUTER_ADDRESS = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45";
 const REACT_APP_INFURA_URL_TESTNET =
-  "https://goerli.infura.io/v3/ba658454f6f544a5b9107c9af34dfebd";
+  "https://eth-goerli.g.alchemy.com/v2/oerArQrj7myE1T1ZFp2B7sotDjfWBsYN";
 
-const chainId = 3;
+const chainId = 5;
 
 const web3Provider = new ethers.providers.JsonRpcProvider(
   REACT_APP_INFURA_URL_TESTNET
@@ -28,7 +28,7 @@ const address0 = "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6";
 const name1 = "Uniswap Token";
 const symbol1 = "UNI";
 const decimals1 = 18;
-const address1 = "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984";
+const address1 = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
 
 const WETH = new Token(chainId, address0, decimals0, symbol0, name0);
 const UNI = new Token(chainId, address1, decimals1, symbol1, name1);
@@ -45,15 +45,20 @@ export const getPrice = async (
   walletAddress
 ) => {
   const percentSlippage = new Percent(slippageAmount, 100);
+  //console.log("percentSlippage", percentSlippage);
+  console.log("inputAmount", inputAmount);
   const wei = ethers.utils.parseUnits(inputAmount.toString(), decimals0);
+  console.log("wei", wei);
   const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(wei));
+  console.log("currencyAmount", currencyAmount);
 
   const route = await router.route(currencyAmount, UNI, TradeType.EXACT_INPUT, {
     recipient: walletAddress,
     slippageTolerance: percentSlippage,
     deadline: deadline,
   });
-  console.log(route);
+
+
   const transaction = {
     data: route.methodParameters.calldata,
     to: V3_SWAP_ROUTER_ADDRESS,
@@ -71,7 +76,7 @@ export const getPrice = async (
 
 export const runSwap = async (transaction, signer) => {
   try {
-    const approvalAmount = ethers.utils.parseUnits("10", 18).toString();
+    const approvalAmount = ethers.utils.parseUnits("0.01", 18).toString();
     const contract0 = getWethContract();
     await contract0
       .connect(signer)
@@ -79,6 +84,6 @@ export const runSwap = async (transaction, signer) => {
     const tx = await signer.sendTransaction(transaction);
     return tx;
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
