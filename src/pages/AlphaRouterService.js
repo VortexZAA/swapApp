@@ -11,7 +11,7 @@ const ERC20ABI = require("./abi.json");
 
 const V3_SWAP_ROUTER_ADDRESS = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45";
 const REACT_APP_INFURA_URL_TESTNET =
-  "https://eth-goerli.g.alchemy.com/v2/oerArQrj7myE1T1ZFp2B7sotDjfWBsYN";
+  "https://goerli.infura.io/v3/4b2dc3ccd4c04648944294ca6e17906f";
 
 const chainId = 5;
 
@@ -44,34 +44,42 @@ export const getPrice = async (
   deadline,
   walletAddress
 ) => {
-  const percentSlippage = new Percent(slippageAmount, 100);
-  //console.log("percentSlippage", percentSlippage);
-  console.log("inputAmount", inputAmount);
-  const wei = ethers.utils.parseUnits(inputAmount.toString(), decimals0);
-  console.log("wei", wei);
-  const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(wei));
-  console.log("currencyAmount", currencyAmount);
+  try {
+    const percentSlippage = new Percent(slippageAmount, 100);
+    //console.log("percentSlippage", percentSlippage);
+    console.log("inputAmount", inputAmount);
+    const wei = ethers.utils.parseUnits(inputAmount.toString(), decimals0);
+    console.log("wei", wei);
+    const currencyAmount = CurrencyAmount.fromRawAmount(WETH, JSBI.BigInt(wei));
+    console.log("currencyAmount", currencyAmount);
 
-  const route = await router.route(currencyAmount, UNI, TradeType.EXACT_INPUT, {
-    recipient: walletAddress,
-    slippageTolerance: percentSlippage,
-    deadline: deadline,
-  });
+    const route = await router.route(
+      currencyAmount,
+      UNI,
+      TradeType.EXACT_INPUT,
+      {
+        recipient: walletAddress,
+        slippageTolerance: percentSlippage,
+        deadline: deadline,
+      }
+    );
 
+    const transaction = {
+      data: route.methodParameters.calldata,
+      to: V3_SWAP_ROUTER_ADDRESS,
+      value: BigNumber.from(route.methodParameters.value),
+      from: walletAddress,
+      gasPrice: BigNumber.from(route.gasPriceWei),
+      gasLimit: ethers.utils.hexlify(1000000),
+    };
 
-  const transaction = {
-    data: route.methodParameters.calldata,
-    to: V3_SWAP_ROUTER_ADDRESS,
-    value: BigNumber.from(route.methodParameters.value),
-    from: walletAddress,
-    gasPrice: BigNumber.from(route.gasPriceWei),
-    gasLimit: ethers.utils.hexlify(1000000),
-  };
+    const quoteAmountOut = route.quote.toFixed(6);
+    const ratio = (inputAmount / quoteAmountOut).toFixed(3);
 
-  const quoteAmountOut = route.quote.toFixed(6);
-  const ratio = (inputAmount / quoteAmountOut).toFixed(3);
-
-  return [transaction, quoteAmountOut, ratio];
+    return [transaction, quoteAmountOut, ratio];
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const runSwap = async (transaction, signer) => {
