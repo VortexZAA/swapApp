@@ -18,7 +18,7 @@ const CurrencyField = (props:any) => {
             autoFocus
             placeholder="0.0"
             value={props.value}
-            onBlur={e => (props.field === 'input' ? getPrice((e.target.value).replace(',','.')) : null)}
+            onChange={e => (props.field === 'input' ? getPrice((e.target.value).replace(',','.')) : null)}
           />
         )}
       </div>
