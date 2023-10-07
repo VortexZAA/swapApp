@@ -1,5 +1,5 @@
 import React from 'react'
-import PageButton from '@/components/pageButton'
+import PageButton from '../components/pageButton'
 import { useAccount, useConnect, useDisconnect, useActiveChain } from "graz";
 
 const ConnectButton = props => {

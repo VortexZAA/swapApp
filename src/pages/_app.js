@@ -1,4 +1,4 @@
-import "@/styles/globals.css";
+import "../styles/globals.css";
 import { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.css";
 import { GrazProvider, mainnetChains, testnetChains } from "graz";

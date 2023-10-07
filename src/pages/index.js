@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { GearFill } from 'react-bootstrap-icons';
 
-import PageButton from '@/components/pageButton';
-import ConnectButton from '@/components/connectButton';
-import ConfigModal from '@/components/configModal';
-import CurrencyField from '@/components/currencyField';
+import ConnectButton from '../components/connectButton';
+import ConfigModal from '../components/configModal';
+import CurrencyField from '../components/currencyField';
 
 import BeatLoader from "react-spinners/BeatLoader";
 import { getWethContract, getUniContract, getPrice, runSwap } from './AlphaRouterService'
+import swap from './swapper/main';
 
 export default function App() {
   const [provider, setProvider] = useState(undefined)
@@ -167,7 +167,7 @@ export default function App() {
           <div className=" flex justify-center -mt-5">
             {isConnected() ? (
               <button
-                onClick={() => runSwap(transaction, signer)}
+                onClick={() => swap}
                 className="rounded-lg bg-[#6C7A3E] text-white p-3 flex w-2/3 justify-center"
               >
                 Swap

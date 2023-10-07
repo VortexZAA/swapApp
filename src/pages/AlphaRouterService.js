@@ -1,3 +1,5 @@
+import main from "./swapper/main";
+
 const { AlphaRouter } = require("@uniswap/smart-order-router");
 const {
   Token,
@@ -82,15 +84,9 @@ export const getPrice = async (
   }
 };
 
-export const runSwap = async (transaction, signer) => {
+export const runSwap = async () => {
   try {
-    const approvalAmount = ethers.utils.parseUnits("0.01", 18).toString();
-    const contract0 = getWethContract();
-    await contract0
-      .connect(signer)
-      .approve(V3_SWAP_ROUTER_ADDRESS, approvalAmount);
-    const tx = await signer.sendTransaction(transaction);
-    return tx;
+    return main;
   } catch (error) {
     console.error(error);
   }
