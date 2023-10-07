@@ -94,7 +94,7 @@ export default function App() {
       signerAddress
     ) */
     setLoading(false)
-    setOutputAmount( 1.40907 )
+    setOutputAmount( (inputAmount / 0.002634).toFixed(3) )
     //return inputAmount === 0.1 ? 1.40907 : 0
   }
   const wallet = useWallet();
