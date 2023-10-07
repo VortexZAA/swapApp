@@ -12,6 +12,7 @@ import swap from './swapper/main';
 import { useWallet } from '@/contexts/WalletProvider';
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2';
+import { useKeplr } from '@/services/keplr';
 export default function App() {
   const [provider, setProvider]:any = useState(undefined)
   const [signer, setSigner]:any = useState(undefined)
@@ -105,6 +106,7 @@ export default function App() {
     console.log('Successfully toasted!');
     Swal.fire(' Transaction Hash: '+ transaction?.toString() )
   }
+  const keplr = useKeplr();
   return (
     <div className=" w-full h-screen flex flex-col bg-gradient-to-r from-[#868C31] via-green-50 to-[#BBCF9A]">
       <div className="appNav">
@@ -189,7 +191,7 @@ export default function App() {
               </button>
             ) : (
               <button
-                onClick={() => {} /* getSigner(provider) */}
+                onClick={() => keplr.connect() /* getSigner(provider) */}
                 className=" rounded-lg bg-[#6C7A3E] text-white p-3 flex w-2/3 justify-center"
               >
                 Connect Wallet

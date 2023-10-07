@@ -26,9 +26,14 @@ const ConnectButton = (props: any) => {
       keplr.disconnect();
     } else {
       keplr.connect();
-      setAccountAdress(await getAddress())
     }
   };
+
+  useEffect(() => {
+    if (wallet.initialized) {
+     async () =>  setAccountAdress(await getAddress())
+    } 
+  }, [wallet.initialized]);
   
 
   //console.log(accountAdress);
