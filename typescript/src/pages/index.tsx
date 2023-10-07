@@ -84,6 +84,8 @@ export default function App() {
   const getSwapPrice = (inputAmount:any) => {
     setLoading(true)
     setInputAmount(inputAmount)
+    console.log('inputAmount', inputAmount);
+    
 
     /* const swap = getPrice(
       inputAmount,
@@ -92,7 +94,8 @@ export default function App() {
       signerAddress
     ) */
     setLoading(false)
-    return inputAmount === 0.1 ? 1.40907 : 0
+    setOutputAmount( 1.40907 )
+    //return inputAmount === 0.1 ? 1.40907 : 0
   }
   const wallet = useWallet();
 
