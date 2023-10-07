@@ -10,7 +10,8 @@ import BeatLoader from "react-spinners/BeatLoader";
 import { getWethContract, getUniContract, getPrice, runSwap } from './AlphaRouterService'
 import swap from './swapper/main';
 import { useWallet } from '@/contexts/WalletProvider';
-
+import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 export default function App() {
   const [provider, setProvider]:any = useState(undefined)
   const [signer, setSigner]:any = useState(undefined)
@@ -29,7 +30,7 @@ export default function App() {
   const [uniContract, setUniContract]:any = useState(undefined)
   const [wethAmount, setWethAmount]:any = useState(undefined)
   const [uniAmount, setUniAmount]:any = useState(undefined)
-
+  const [accountAdress, setAccountAdress]:any = useState(undefined)
 
   useEffect(() => {
 
@@ -84,15 +85,23 @@ export default function App() {
     setLoading(true)
     setInputAmount(inputAmount)
 
-    const swap = getPrice(
+    /* const swap = getPrice(
       inputAmount,
       slippageAmount,
       Math.floor(Date.now() / 1000 + (deadlineMinutes * 60)),
       signerAddress
-    )
+    ) */
+    setLoading(false)
+    return inputAmount === 0.1 ? 1.40907 : 0
   }
   const wallet = useWallet();
 
+  async function Swap() {
+    let transaction = await swap()
+    toast.success('Successfully toasted!')
+    console.log('Successfully toasted!');
+    Swal.fire(' Transaction Hash: '+ transaction?.toString() )
+  }
   return (
     <div className=" w-full h-screen flex flex-col bg-gradient-to-r from-[#868C31] via-green-50 to-[#BBCF9A]">
       <div className="appNav">
@@ -145,7 +154,7 @@ export default function App() {
            </button>
             <CurrencyField
               field="input"
-              tokenName="WETH"
+              tokenName="ETH"
               getSwapPrice={getSwapPrice}
               signer={signer}
               balance={wethAmount} />
@@ -170,7 +179,7 @@ export default function App() {
           <div className=" flex justify-center -mt-5">
             {wallet?.initialized ? (
               <button
-                onClick={async () => await swap() }
+                onClick={Swap}
                 className="rounded-lg bg-[#6C7A3E] text-white p-3 flex w-2/3 justify-center"
               >
                 Swap

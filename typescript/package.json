@@ -30,6 +30,7 @@
     "react-bootstrap-icons": "^1.10.3",
     "react-hot-toast": "^2.4.1",
     "react-spinners": "^0.13.8",
+    "sweetalert2": "^11.7.32",
     "userop": "^0.3.3",
     "wagmi": "^1.4.3"
   },

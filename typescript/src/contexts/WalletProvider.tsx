@@ -22,6 +22,8 @@ export interface WalletContextType {
     readonly network: string;
     readonly setNetwork: (network: string) => void;
     readonly balanceByDenom: Dictionary<Coin | undefined>;
+    readonly transactionHash: string;
+    readonly accountAddress: string;
     // readonly accountNumber: number;
 }
 
@@ -42,7 +44,9 @@ const defaultContext: WalletContextType = {
     updateSigner: throwNotInitialized,
     network: "",
     setNetwork: throwNotInitialized,
-    balanceByDenom: {}
+    balanceByDenom: {},
+    transactionHash: "",
+    accountAddress: "",
     // accountNumber: 0,
 };
 
@@ -141,7 +145,9 @@ export function WalletProvider({
                     updateSigner,
                     network,
                     setNetwork,
-                    balanceByDenom: groupBalanceByDenom(balance)
+                    balanceByDenom: groupBalanceByDenom(balance),
+                    transactionHash: "",
+                    accountAddress: "",
                 })
             }
         }
