@@ -18,11 +18,20 @@ import { useWallet } from "@/contexts/WalletProvider";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import Ethers from "@/lib/ethers";
+import Dropdown from "@/components/dropdown";
 
 export default function App() {
-  const [dropdown, setDropdown] = useState<string>('Ethereum');
+  const [dropdown, setDropdown] = useState<string>("Ethereum");
   const [position, setPosition] = useState(0);
-  const options: string[] = ['Ethereum', 'Scroll', 'Mantle', 'BSC', 'Arbitrum', 'Polygon', 'Base'];
+  const options: string[] = [
+    "Ethereum",
+    "Scroll",
+    "Mantle",
+    "BSC",
+    "Arbitrum",
+    "Polygon",
+    "Base",
+  ];
   const [provider, setProvider]: any = useState(undefined);
   const [signer, setSigner]: any = useState(undefined);
   const [signerAddress, setSignerAddress]: any = useState(undefined);
@@ -111,27 +120,29 @@ export default function App() {
   }
   return (
     <div className=" w-full h-screen flex flex-col bg-white">
-      <div className="appNav">
+      <div className="flex items-center justify-between max-w-7xl mx-auto  w-full py-3 px-3 2xl:px-6">
         {/*  <div className="my-2 hidden buttonContainer buttonContainerTop">
           <PageButton name={"Swap"} isBold={true} />
           <PageButton name={"Pool"} />
           <PageButton name={"Vote"} />
           <PageButton name={"Charts"} />
         </div> */}
+        <Dropdown
+          label={dropdown}
+          options={options}
+          selectedOption={dropdown}
+          onSelect={setDropdown}
+        />
 
-        <div className="rightNav">
-          <div className="connectButtonContainer">
-            <ConnectButton
-              provider={provider}
-              isConnected={isConnected}
-              signerAddress={signerAddress}
-              getSigner={getSigner}
-            />
-          </div>
-          {/*  <div className="my-2 buttonContainer">
+        <ConnectButton
+          provider={provider}
+          isConnected={isConnected}
+          signerAddress={signerAddress}
+          getSigner={getSigner}
+        />
+        {/*  <div className="my-2 buttonContainer">
             <PageButton name={"..."} isBold={true} />
           </div> */}
-        </div>
       </div>
 
       <div className="w-full h-full flex justify-center items-center ">
@@ -161,32 +172,32 @@ export default function App() {
 
           <div className="swapBody bg-[#161620] p-6 gap-6 rounded-3xl relative justify-center items-center flex flex-col">
             <div className="flex flex-col gap-6 justify-center w-full relative items-center">
-            <button className=" z-50 object-fill w-12 h-12  opacity-80 hover:opacity-100 transition-all absolute ">
-              <svg
-                className="h-full"
-                viewBox="0 0 100 100"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect
-                  x="2.5"
-                  y="2.5"
-                  width="95"
-                  height="95"
-                  rx="17.5"
-                  fill="#272733"
-                  stroke="#161620"
-                  stroke-width="5"
-                />
-                <path
-                  d="M50 64.5833L50 35.4167M50 64.5833L37.5 52.0833M50 64.5833L62.5 52.0833"
-                  stroke="white"
-                  stroke-width="6.25"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </button>
+              <button className=" z-50 object-fill w-12 h-12  opacity-80 hover:opacity-100 transition-all absolute ">
+                <svg
+                  className="h-full"
+                  viewBox="0 0 100 100"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="2.5"
+                    y="2.5"
+                    width="95"
+                    height="95"
+                    rx="17.5"
+                    fill="#272733"
+                    stroke="#161620"
+                    stroke-width="5"
+                  />
+                  <path
+                    d="M50 64.5833L50 35.4167M50 64.5833L37.5 52.0833M50 64.5833L62.5 52.0833"
+                    stroke="white"
+                    stroke-width="6.25"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
               <CurrencyField
                 field="input"
                 tokenName="ETH"

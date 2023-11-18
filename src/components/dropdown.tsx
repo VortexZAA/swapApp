@@ -39,11 +39,11 @@ const Dropdown: React.FC<DropdownProps> = ({ label, options, selectedOption, onS
   }, []);
 
   return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
+    <div className="relative  text-left flex flex-col justify-start items-center" ref={dropdownRef}>
       <div>
         <button
           type="button"
-          className="inline-flex justify-center w-full rounded-md px-2 py-2 bg-gradient-to-r from-purple to-green text-sm font-medium text-white hover:bg-gray-50 "
+          className="inline-flex justify-center w-full rounded-md px-6 py-3 bg-gradient-to-r from-purple to-green text-sm font-medium text-black bg-gray-200 hover:bg-gray-100 "
           aria-haspopup="true"
           aria-expanded={isOpen}
           onClick={toggleDropdown}
@@ -66,14 +66,14 @@ const Dropdown: React.FC<DropdownProps> = ({ label, options, selectedOption, onS
       </div>
 
       {isOpen && (
-        <div className="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1" role="menu" aria-orientation="vertical">
+        <div className="origin-top-right absolute  mt-12 w-32 rounded-md shadow-lg bg-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="py-1 divide-y divide-gray-400" role="menu" aria-orientation="vertical">
             {options.map((option) => (
               <button
                 key={option}
                 className={`${
-                  selectedOption === option ? 'bg-indigo-600 text-black' : 'text-black'
-                } block w-full text-left px-4 py-2 text-sm`}
+                  selectedOption === option ? 'bg-indigo-600 text-white' : ''
+                } block w-full text-left px-4 py-2 text-sm hover:bg-indigo-600 last:rounded-b-lg hover:text-white transition-all`}
                 role="menuitem"
                 onClick={() => handleOptionClick(option)}
               >
