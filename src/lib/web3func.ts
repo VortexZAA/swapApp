@@ -113,15 +113,17 @@ const uniswapRouter = "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD";
 const scrollToken = "0x00A5Aa31fe45ef1627222b9eFEf7A05f841dC1E3";
 const mock = "0x2FF7940952C5F08288ace086D8dC3bdBE6F1BCCA";
 
-const bundlerClient:any = createClient({
-  transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${apiKey}`),
+const bundlerClient: any = createClient({
+  transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${apiKey}`),
   chain: scrollSepolia,
-});
+}).extend(pimlicoBundlerActions);
+console.log("bundlerClient", bundlerClient);
+
 const paymasterClient = createClient({
   // ⚠️ using v2 of the API ⚠️
   transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${apiKey}`),
-  chain: scrollSepolia
-}).extend(pimlicoPaymasterActions)
+  chain: scrollSepolia,
+}).extend(pimlicoPaymasterActions);
 
 // DEPLOY THE SIMPLE WALLET
 const genereteApproveCallData = (
@@ -172,7 +174,7 @@ const genereteApproveCallData = (
 
 type HexString = `0x${string}`;
 
-const genereteSwapData = (
+/* const genereteSwapData = (
   erc20TokenAddress: Address,
   paymasterAddress: Address
 ) => {
@@ -224,65 +226,61 @@ const genereteSwapData = (
   });
 
   return callData;
-};
-async function mint() {
-  const senderAddress = await getSenderAddress(publicClient, {
-    initCode,
-    entryPoint: ENTRY_POINT_ADDRESS,
-  });
+}; */
+export async function mint({ senderAddress }: { senderAddress: Address }) {
+  try {
+    console.log("Counterfactual sender address:", senderAddress);
 
-  console.log("Counterfactual sender address:", senderAddress);
+    // DEPLOY THE SIMPLE WALLET
+    const genereteApproveCallData = (
+      erc20TokenAddress: Address,
+      paymasterAddress: Address
+    ) => {
+      const approveData = encodeFunctionData({
+        abi: [
+          {
+            inputs: [
+              { name: "_to", type: "address" },
+              { name: "_amount", type: "uint256" },
+            ],
+            name: "mint",
+            outputs: [{ name: "", type: "bool" }],
+            payable: false,
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        args: [erc20TokenAddress, BigInt(32000000)],
+      });
 
-  // DEPLOY THE SIMPLE WALLET
-  const genereteApproveCallData = (
-    erc20TokenAddress: Address,
-    paymasterAddress: Address
-  ) => {
-    const approveData = encodeFunctionData({
-      abi: [
-        {
-          inputs: [
-            { name: "_to", type: "address" },
-            { name: "_amount", type: "uint256" },
-          ],
-          name: "mint",
-          outputs: [{ name: "", type: "bool" }],
-          payable: false,
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ],
-      args: [erc20TokenAddress, BigInt(32000000)],
-    });
+      // GENERATE THE CALLDATA TO APPROVE THE USDC
+      const to = scrollToken;
+      const value = BigInt(0);
+      const data = approveData;
 
-    // GENERATE THE CALLDATA TO APPROVE THE USDC
-    const to = scrollToken;
-    const value = BigInt(0);
-    const data = approveData;
+      const callData = encodeFunctionData({
+        abi: [
+          {
+            inputs: [
+              { name: "dest", type: "address" },
+              { name: "value", type: "uint256" },
+              { name: "func", type: "bytes" },
+            ],
+            name: "execute",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        args: [to, value, data],
+      });
 
-    const callData = encodeFunctionData({
-      abi: [
-        {
-          inputs: [
-            { name: "dest", type: "address" },
-            { name: "value", type: "uint256" },
-            { name: "func", type: "bytes" },
-          ],
-          name: "execute",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ],
-      args: [to, value, data],
-    });
+      return callData;
+    };
 
-    return callData;
-  };
+    type HexString = `0x${string}`;
 
-  type HexString = `0x${string}`;
-
-  const genereteSwapData = (
+    /* const genereteSwapData = (
     erc20TokenAddress: Address,
     paymasterAddress: Address
   ) => {
@@ -334,84 +332,102 @@ async function mint() {
     });
 
     return callData;
-  };
-  const submitUserOperation = async (userOperation: UserOperation) => {
-    const userOperationHash = await bundlerClient.sendUserOperation({
-      userOperation,
+  }; */
+
+    const submitUserOperation = async (userOperation: UserOperation) => {
+      try {
+        const userOperationHash = await bundlerClient.sendUserOperation({
+          userOperation,
+          entryPoint: ENTRY_POINT_ADDRESS,
+        });
+        console.log(`UserOperation submitted. Hash: ${userOperationHash}`);
+
+        console.log("Querying for receipts...");
+        const receipt = await bundlerClient.waitForUserOperationReceipt({
+          hash: userOperationHash,
+        });
+        await receipt.wait();
+        console.log(
+          `Receipt found!\nTransaction hash: ${receipt.receipt.transactionHash}`
+        );
+        return receipt.receipt.transactionHash;
+      } catch (error) {
+        console.log("error", error);
+        return false;
+      }
+    };
+
+    const senderUsdcBalance = await publicClient.readContract({
+      abi: [
+        {
+          inputs: [{ name: "_account", type: "address" }],
+          name: "balanceOf",
+          outputs: [{ name: "balance", type: "uint256" }],
+          type: "function",
+          stateMutability: "view",
+        },
+      ],
+      address: scrollToken,
+      functionName: "balanceOf",
+      args: [senderAddress],
+    });
+    const approveCallData = genereteApproveCallData(
+      senderAddress,
+      erc20PaymasterAddress
+    );
+    //const execCallData = genereteSwapData(uniswapRouter, erc20PaymasterAddress);
+
+    // FILL OUT THE REMAINING USEROPERATION VALUES
+    let gasPriceResult:any = {}
+    try {
+      gasPriceResult = await bundlerClient.getUserOperationGasPrice();
+    } catch (error) {
+      console.log("error", error);
+      
+    }
+
+    const nonce = await getAccountNonce(publicClient, {
+      sender: senderAddress,
       entryPoint: ENTRY_POINT_ADDRESS,
     });
-    console.log(`UserOperation submitted. Hash: ${userOperationHash}`);
+    if (nonce !== BigInt(0)) {
+      initCode = "0x";
+    }
+    const userOperation: Partial<UserOperation> = {
+      sender: senderAddress,
+      nonce,
+      initCode,
+      callData: approveCallData,
+      maxFeePerGas: gasPriceResult.fast.maxFeePerGas,
+      maxPriorityFeePerGas: gasPriceResult.fast.maxPriorityFeePerGas,
+      paymasterAndData: "0x",
+      signature:
+        "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
+    };
 
-    console.log("Querying for receipts...");
-    const receipt = await bundlerClient.waitForUserOperationReceipt({
-      hash: userOperationHash,
+    const result = await paymasterClient.sponsorUserOperation({
+      userOperation: userOperation as UserOperation,
+      entryPoint: ENTRY_POINT_ADDRESS,
     });
-    console.log(
-      `Receipt found!\nTransaction hash: ${receipt.receipt.transactionHash}`
-    );
-  };
 
-  const senderUsdcBalance = await publicClient.readContract({
-    abi: [
-      {
-        inputs: [{ name: "_account", type: "address" }],
-        name: "balanceOf",
-        outputs: [{ name: "balance", type: "uint256" }],
-        type: "function",
-        stateMutability: "view",
-      },
-    ],
-    address: scrollToken,
-    functionName: "balanceOf",
-    args: [senderAddress],
-  });
-  const approveCallData = genereteApproveCallData(
-    senderAddress,
-    erc20PaymasterAddress
-  );
-  //const execCallData = genereteSwapData(uniswapRouter, erc20PaymasterAddress);
+    userOperation.preVerificationGas = result.preVerificationGas;
+    userOperation.verificationGasLimit = result.verificationGasLimit;
+    userOperation.callGasLimit = result.callGasLimit;
+    userOperation.paymasterAndData = result.paymasterAndData;
 
-  // FILL OUT THE REMAINING USEROPERATION VALUES
-  const gasPriceResult = await bundlerClient.getUserOperationGasPrice();
+    // SIGN THE USEROPERATION
+    const signature = await signUserOperationHashWithECDSA({
+      account: signer,
+      userOperation: userOperation as UserOperation,
+      chainId: scrollSepolia.id,
+      entryPoint: ENTRY_POINT_ADDRESS,
+    });
 
-  const nonce = await getAccountNonce(publicClient, {
-    sender: senderAddress,
-    entryPoint: ENTRY_POINT_ADDRESS,
-  });
-  if (nonce !== BigInt(0)) {
-    initCode = "0x";
+    userOperation.signature = signature;
+    await submitUserOperation(userOperation as UserOperation);
+
+    console.log("balance = ", senderUsdcBalance);
+  } catch (error) {
+    console.log("error", error);
   }
-  const userOperation: Partial<UserOperation> = {
-    sender: senderAddress,
-    nonce,
-    initCode,
-    callData: approveCallData,
-    maxFeePerGas: gasPriceResult.fast.maxFeePerGas,
-    maxPriorityFeePerGas: gasPriceResult.fast.maxPriorityFeePerGas,
-    paymasterAndData: "0x",
-    signature:
-      "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
-  };
-
-  const result = await paymasterClient.sponsorUserOperation({
-    userOperation: userOperation as UserOperation,
-    entryPoint: ENTRY_POINT_ADDRESS,
-  });
-
-  userOperation.preVerificationGas = result.preVerificationGas;
-  userOperation.verificationGasLimit = result.verificationGasLimit;
-  userOperation.callGasLimit = result.callGasLimit;
-  userOperation.paymasterAndData = result.paymasterAndData;
-
-  // SIGN THE USEROPERATION
-  const signature = await signUserOperationHashWithECDSA({
-    account: signer,
-    userOperation: userOperation as UserOperation,
-    chainId: scrollSepolia.id,
-    entryPoint: ENTRY_POINT_ADDRESS,
-  });
-
-  userOperation.signature = signature;
-  await submitUserOperation(userOperation as UserOperation);
-  console.log("balance = ", senderUsdcBalance);
 }

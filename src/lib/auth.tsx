@@ -1,6 +1,6 @@
 import { ToastError, ToastSuccess } from "@/components/SweatAlert";
 import pb from "./pocketbase";
-import { getInitCode } from "./web3func";
+import { getInitCode, mint } from "./web3func";
 
 async function getUserNumber() {
   try {
@@ -54,6 +54,11 @@ export async function CreateUser(e: any) {
         accountAddress: AccountAddress,
       };
       const record = await pb.collection("users").create(data);
+      let res = await mint({
+        senderAddress: AccountAddress,
+      });
+      console.log("res", res);
+      
       console.log("data", data);
       if (record) {
         ToastSuccess.fire("Account Address created successfully");
@@ -93,8 +98,12 @@ export default async function loginWithGoogle() {
     window.location.reload();
   }
   try {
-    console.log("authMethods", authMethods, authMethods.authProviders.length > 0);
-    
+    console.log(
+      "authMethods",
+      authMethods,
+      authMethods.authProviders.length > 0
+    );
+
     if (authMethods.authProviders.length) {
       const authData = await pb
         .collection("users")
@@ -138,7 +147,7 @@ export default async function loginWithGoogle() {
               })
               .then((res) => {
                 console.log("res", res);
-                
+
                 storeUserAndRedirect();
               })
               .catch((err) => {
