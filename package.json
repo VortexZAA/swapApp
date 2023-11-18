@@ -41,7 +41,7 @@
     "sweetalert2": "^11.7.32",
     "userop": "^0.3.3",
     "wagmi": "^1.4.3",
-    "viem": "^1.13.2"
+    "viem": "^1.15.3"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.184",

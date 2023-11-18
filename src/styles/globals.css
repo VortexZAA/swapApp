@@ -19,13 +19,7 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+ color: black
 }
 .App {
   text-align: center;
@@ -33,11 +27,7 @@ body {
   min-height: 100vh;
 }
 
-body {
-  max-width: 100%;
-  margin: 0 auto;
-  background: white
-}
+
 
 #root {
   min-height: 100vh;

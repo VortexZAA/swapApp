@@ -1,6 +1,6 @@
 import { ToastError, ToastSuccess } from "@/components/SweatAlert";
 import pb from "./pocketbase";
-import { getInitCode, mint } from "./web3func";
+import { getInitCode } from "./web3func";
 
 async function getUserNumber() {
   try {
@@ -54,10 +54,6 @@ export async function CreateUser(e: any) {
         accountAddress: AccountAddress,
       };
       const record = await pb.collection("users").create(data);
-      let res = await mint({
-        senderAddress: AccountAddress,
-      });
-      console.log("res", res);
       
       console.log("data", data);
       if (record) {
