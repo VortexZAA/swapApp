@@ -119,7 +119,7 @@ export default function App() {
     Swal.fire(" Transaction Hash: " + transaction?.toString());
   }
   return (
-    <div className=" w-full h-screen flex flex-col bg-white">
+    <div className=" w-full h-screen flex flex-col">
       <div className="flex items-center justify-between max-w-7xl mx-auto  w-full py-3 px-3 2xl:px-6">
         {/*  <div className="my-2 hidden buttonContainer buttonContainerTop">
           <PageButton name={"Swap"} isBold={true} />
