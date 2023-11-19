@@ -23,14 +23,35 @@ import Dropdown from "@/components/dropdown";
 export default function App() {
   const [dropdown, setDropdown] = useState<string>("Ethereum");
   const [position, setPosition] = useState(0);
-  const options: string[] = [
-    "Ethereum",
-    "Scroll",
-    "Mantle",
-    "BSC",
-    "Arbitrum",
-    "Polygon",
-    "Base",
+  const options: any[] = [
+    {
+      value: "Ethereum",
+      icon: <img src={"/images/Ethereum.png"} />,
+    },
+    {
+      value: "Wizarre Scrol",
+      icon: <img src={"/images/Wizarre Scrol.png"} />,
+    },
+    {
+      value: "Mantle",
+      icon: <img src={"/images/Mantle.png"} />,
+    },
+    {
+      value: "BSC",
+      icon: <img src={"/images/BSC.png"} />,
+    },
+    {
+      value: "Arbitrum",
+      icon: <img src={"/images/Arbitrum.png"} />,
+    },
+    {
+      value: "Polygon",
+      icon: <img src={"/images/Polygon.png"} />,
+    },
+    {
+      value: "Base Protocol",
+      icon: <img src={"/images/Base Protocol.png"} />,
+    },
   ];
   const [provider, setProvider]: any = useState(undefined);
   const [signer, setSigner]: any = useState(undefined);
