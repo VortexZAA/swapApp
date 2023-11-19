@@ -9,7 +9,7 @@ import Modal from "./Modal";
 import pb from "@/lib/pocketbase";
 import { getInitCode } from "@/lib/web3func";
 import { Toast, ToastError, ToastSuccess } from "./SweatAlert";
-import loginWithGoogle, { CreateUser } from "@/lib/auth";
+import loginWithGoogle, { CreateUser, useLogin } from "@/lib/auth";
 
 const googleIcon = (
   <svg
@@ -69,21 +69,14 @@ const ConnectButton = (props: any) => {
     project_id: "project-test-2fec3cd3-c889-4027-8727-3c7a4ac05a8e",
     secret: "secret-test-QT3KOFDy5KczoEaTnrFjcqVNzag10Xz-di4=",
   });
+  const isValid = pb.authStore.isValid
+  async function login(e: any) {
+    e.preventDefault();
+    let username = e.target.username.value;
+    let password = e.target.password.value;
 
-  async function login(email: string) {
-    const stytchResponse = await stytchClient.otps.email.loginOrCreate({
-      email: email,
-    });
-
-    const authResponse = await stytchClient.otps.authenticate({
-      method_id: stytchResponse.email_id,
-      code: "otpResponse.code",
-      session_duration_minutes: 60 * 24 * 7,
-    });
-
-    const sessionStatus = await stytchClient.sessions.authenticate({
-      session_token: authResponse.session_token,
-    });
+    let res = await useLogin({ email: username, password: password });
+    console.log("res", res);
   }
   const {
     isConnected: connectMetamask,
@@ -114,6 +107,7 @@ const ConnectButton = (props: any) => {
     <>
       <Modal title="Login" modal={modal} setModal={setModal}>
         <form
+          onSubmit={login}
           key={"login"}
           className="w-[375px] h-fit px-6 gap-3 flex flex-col pb-6 items-center"
         >
@@ -121,7 +115,7 @@ const ConnectButton = (props: any) => {
           <span className="text-[#ADADAD] text-xs font-medium">Or</span>
           <input
             type="text"
-            name="text"
+            name="username"
             className="border border-[#616161] px-3 bg-[#272733] outline-none rounded-md w-full py-2"
             placeholder="Email or Username"
           />
