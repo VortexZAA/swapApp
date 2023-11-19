@@ -1,13 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
 interface DropdownProps {
   label: string;
-  options: string[];
+  options: {
+    value: string;
+    icon: string;
+  }[];
   selectedOption: string;
   onSelect: (option: string) => void;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ label, options, selectedOption, onSelect }) => {
+const Dropdown: React.FC<DropdownProps> = ({
+  label,
+  options,
+  selectedOption,
+  onSelect,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -25,25 +33,31 @@ const Dropdown: React.FC<DropdownProps> = ({ label, options, selectedOption, onS
   };
 
   const handleOutsideClick = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
       closeDropdown();
     }
   };
 
   useEffect(() => {
-    window.addEventListener('click', handleOutsideClick);
+    window.addEventListener("click", handleOutsideClick);
 
     return () => {
-      window.removeEventListener('click', handleOutsideClick);
+      window.removeEventListener("click", handleOutsideClick);
     };
   }, []);
 
   return (
-    <div className="relative  text-left flex flex-col justify-start items-center" ref={dropdownRef}>
+    <div
+      className="relative 	 text-left flex flex-col justify-start items-center"
+      ref={dropdownRef}
+    >
       <div>
         <button
           type="button"
-          className="inline-flex justify-center w-full rounded-md px-6 py-3 bg-gradient-to-r from-purple to-green text-sm font-medium text-black bg-gray-200 hover:bg-gray-100 "
+          className="inline-flex 	 justify-center w-64 rounded-md px-6 py-3 bg-gradient-to-r from-purple to-green text-sm font-medium text-black bg-gray-200 hover:bg-gray-100 "
           aria-haspopup="true"
           aria-expanded={isOpen}
           onClick={toggleDropdown}
@@ -66,18 +80,24 @@ const Dropdown: React.FC<DropdownProps> = ({ label, options, selectedOption, onS
       </div>
 
       {isOpen && (
-        <div className="origin-top-right absolute  mt-12 w-32 rounded-md shadow-lg bg-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1 divide-y divide-gray-400" role="menu" aria-orientation="vertical">
+        <div className="origin-top-right absolute  my-12 w-64 rounded-b-lg shadow-lg bg-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div
+            className="divide-y divide-slate-400"
+            role="menu"
+            aria-orientation="vertical"
+          >
             {options.map((option) => (
               <button
-                key={option}
+                key={option.value}
                 className={`${
-                  selectedOption === option ? 'bg-indigo-600 text-white' : ''
-                } block w-full text-left px-4 py-2 text-sm hover:bg-indigo-600 last:rounded-b-lg hover:text-white transition-all`}
+                  selectedOption === option.value
+                    ? "bg-neutral-800 text-white"
+                    : ""
+                } w-64 flex gap-3 items-center text-left 	 px-4 py-3 text-sm hover:bg-neutral-800 last:rounded-b-lg hover:text-white transition-all`}
                 role="menuitem"
-                onClick={() => handleOptionClick(option)}
+                onClick={() => handleOptionClick(option.value)}
               >
-                {option}
+                {option.icon} {option.value}
               </button>
             ))}
           </div>
