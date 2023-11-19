@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Blinker:wght@100;200;300;400;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Manrope:wght@200;300;400;500;600;700;800&display=swap");
+
+@import url('https://fonts.googleapis.com/css2?family=Blinker:wght@100;200;300;400;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -18,13 +19,7 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+ color: black
 }
 .App {
   text-align: center;
@@ -32,11 +27,7 @@ body {
   min-height: 100vh;
 }
 
-body {
-  max-width: 100%;
-  margin: 0 auto;
-  background: white;
-}
+
 
 #root {
   min-height: 100vh;
@@ -94,7 +85,7 @@ body {
 }
 
 .swapContainer {
-  background-color: #e3ebf6;
+  background-color: #E3EBF6;
   width: 600px;
   height: 350px;
   margin: 0 auto;
@@ -115,6 +106,7 @@ body {
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+  
 }
 
 .gearContainer {
@@ -155,6 +147,7 @@ body {
 .tokenName {
   font-size: 28px;
   display: block;
+  
 }
 .balanceContainer {
   display: block;
@@ -163,6 +156,7 @@ body {
   width: 100%;
   font-size: 16px;
   display: inline;
+  
 }
 
 /******************************************************************************/
