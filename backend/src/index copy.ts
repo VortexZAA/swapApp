@@ -32,7 +32,7 @@ import {
   privateKeyToAccount,
   signMessage,
 } from "viem/accounts";
-import { lineaTestnet, scrollSepolia } from "viem/chains";
+import { lineaTestnet, scrollSepolia, arbitrumGoerli } from "viem/chains";
 
 const app = express();
 const port = process.env.PORT || 3091;
@@ -74,7 +74,7 @@ if (privateKey.match(/GENERATED_PRIVATE_KEY/)) {
     "Please replace the `privateKey` variable with a newly generated private key. You can use `generatePrivateKey()` for this"
   );
 }
-const erc20PaymasterAddress = "0x65B8C906cf61eB52E12B0c68AE0f7D46E3386903";
+const erc20PaymasterAddress = "0xEc43912D8C772A0Eba5a27ea5804Ba14ab502009";
 const usdcTokenAddress = "0x690000EF01deCE82d837B5fAa2719AE47b156697"; // USDC on Polygon Mumbai
 const uniswapRouter = "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD";
 const scrollToken = "0x00A5Aa31fe45ef1627222b9eFEf7A05f841dC1E3";
@@ -82,7 +82,7 @@ const mock = "0x2FF7940952C5F08288ace086D8dC3bdBE6F1BCCA";
 
 const bundlerClient = createClient({
   transport: http(`https://api.pimlico.io/v1/${chain}/rpc?apikey=${apiKey}`),
-  chain: scrollSepolia,
+  chain: arbitrumGoerli,
 })
   .extend(bundlerActions)
   .extend(pimlicoBundlerActions);
@@ -90,12 +90,12 @@ const bundlerClient = createClient({
 const paymasterClient = createClient({
   // ⚠️ using v2 of the API ⚠️
   transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${apiKey}`),
-  chain: scrollSepolia,
+  chain: arbitrumGoerli,
 }).extend(pimlicoPaymasterActions);
 
 const publicClient = createPublicClient({
   transport: http("https://sepolia-rpc.scroll.io/"),
-  chain: scrollSepolia,
+  chain: arbitrumGoerli,
 });
 
 
@@ -142,68 +142,6 @@ async function getBalance(userNumber: number) {
   console.log("balance = ", senderUsdcBalance);
   return senderUsdcBalance;
 }
-
-
-async function Swap() {
-  type HexString = `0x${string}`;
-
-  const genereteSwapData = (
-    erc20TokenAddress: Address,
-    paymasterAddress: Address
-  ) => {
-    const commands = "0x0b00";
-    const deadline = 1716654725n;
-    const inputs: HexString[] = [
-      "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000009184e72a000",
-      "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000009184e72a00000000000000000000000000000000000000000000000000000006de8846537e400000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002bb4fbf271143f4fbf7b91a5ded31805e42b2208d60001f41f9840a85d5af5bf1d1762f925bdaddc4201f984000000000000000000000000000000000000000000",
-    ];
-    //const inputsAsBytes = inputs.map((input) => ethers.utils.arrayify(input));
-    const approveData = encodeFunctionData({
-      abi: [
-        {
-          inputs: [
-            { name: "commands", type: "bytes" },
-            { name: "inputs", type: "bytes[]" },
-            { name: "deadline", type: "uint256" },
-          ],
-          name: "execute",
-          outputs: [{ name: "", type: "bool" }],
-          payable: false,
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ],
-      args: [commands, inputs, deadline],
-    });
-
-    // GENERATE THE CALLDATA TO APPROVE THE USDC
-    const to = erc20TokenAddress;
-    const value = 0n;
-    const data = approveData;
-
-    const callData = encodeFunctionData({
-      abi: [
-        {
-          inputs: [
-            { name: "dest", type: "address" },
-            { name: "value", type: "uint256" },
-            { name: "func", type: "bytes" },
-          ],
-          name: "execute",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-      ],
-      args: [to, value, data],
-    });
-
-    return callData;
-  };
-  const execCallData = genereteSwapData(uniswapRouter, erc20PaymasterAddress);
-  
-}
-
 
 async function Mint(userNumber: number) {
   // DEFINE THE CONSTANTS
@@ -352,21 +290,11 @@ async function Mint(userNumber: number) {
     );
   };
 
-  // You can get the paymaster addresses from https://docs.pimlico.io/reference/erc20-paymaster/contracts
-
-  /* if (senderUsdcBalance < 1_000_000n) {
-    throw new Error(
-        `insufficient USDC balance for counterfactual wallet address ${senderAddress}: ${
-            Number(senderUsdcBalance) / 1000000
-        } USDC, required at least 1 USDC`
-    )
-} */
-
   const approveCallData = genereteApproveCallData(
     senderAddress,
     erc20PaymasterAddress
   );
-  
+  const execCallData = genereteSwapData(uniswapRouter, erc20PaymasterAddress);
 
   // FILL OUT THE REMAINING USEROPERATION VALUES
   const gasPriceResult = await bundlerClient.getUserOperationGasPrice();
@@ -384,7 +312,7 @@ async function Mint(userNumber: number) {
     sender: senderAddress,
     nonce,
     initCode,
-    callData: approveCallData,
+    callData: execCallData,
     maxFeePerGas: gasPriceResult.fast.maxFeePerGas,
     maxPriorityFeePerGas: gasPriceResult.fast.maxPriorityFeePerGas,
     paymasterAndData: "0x",
@@ -392,31 +320,28 @@ async function Mint(userNumber: number) {
       "0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c",
   };
 
-  if (true) {
-    // SPONSOR THE USEROPERATION USING THE VERIFYING PAYMASTER
-    const result = await paymasterClient.sponsorUserOperation({
-      userOperation: userOperation as UserOperation,
-      entryPoint: ENTRY_POINT_ADDRESS,
-    });
 
-    userOperation.preVerificationGas = result.preVerificationGas;
-    userOperation.verificationGasLimit = result.verificationGasLimit;
-    userOperation.callGasLimit = result.callGasLimit;
-    userOperation.paymasterAndData = result.paymasterAndData;
+  // SPONSOR THE USEROPERATION USING THE VERIFYING PAYMASTER
+  const result = await paymasterClient.sponsorUserOperation({
+    userOperation: userOperation as UserOperation,
+    entryPoint: ENTRY_POINT_ADDRESS,
+  });
 
-    // SIGN THE USEROPERATION
-    const signature = await signUserOperationHashWithECDSA({
-      account: signer,
-      userOperation: userOperation as UserOperation,
-      chainId: scrollSepolia.id,
-      entryPoint: ENTRY_POINT_ADDRESS,
-    });
+  userOperation.preVerificationGas = result.preVerificationGas;
+  userOperation.verificationGasLimit = result.verificationGasLimit;
+  userOperation.callGasLimit = result.callGasLimit;
+  userOperation.paymasterAndData = result.paymasterAndData;
 
-    userOperation.signature = signature;
-    await submitUserOperation(userOperation as UserOperation);
+  // SIGN THE USEROPERATION
+  const signature = await signUserOperationHashWithECDSA({
+    account: signer,
+    userOperation: userOperation as UserOperation,
+    chainId: arbitrumGoerli.id,
+    entryPoint: ENTRY_POINT_ADDRESS,
+  });
 
-    return true;
-  } else {
-    console.log("Deployment UserOperation previously submitted, skipping...");
-  }
+  userOperation.signature = signature;
+  await submitUserOperation(userOperation as UserOperation);
+
+  return true;
 }

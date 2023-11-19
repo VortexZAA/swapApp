@@ -19,9 +19,9 @@ import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import Ethers from "@/lib/ethers";
 import Dropdown from "@/components/dropdown";
+import pb from "@/lib/pocketbase";
 
 export default function App() {
-  
   const [position, setPosition] = useState(0);
   const options: any[] = [
     {
@@ -140,6 +140,17 @@ export default function App() {
     console.log("Successfully toasted!");
     Swal.fire(" Transaction Hash: " + transaction?.toString());
   }
+  const [isValid, setIsValid] = useState(false);
+  const model: any = isValid ? pb?.authStore?.model : "";
+  console.log("model", model);
+  async function logOut() {
+    pb.authStore.clear();
+    setIsValid(false);
+  }
+  useEffect(() => {
+    const isValid = pb.authStore.isValid;
+    setIsValid(isValid);
+  }, [model]);
   return (
     <div className=" w-full h-screen flex flex-col">
       <div className="flex items-center justify-between max-w-7xl mx-auto  w-full py-3 px-3 2xl:px-6">
@@ -238,7 +249,7 @@ export default function App() {
               />
             </div>
             <div className=" flex justify-center  w-full">
-              {wallet?.initialized ? (
+              {isValid ? (
                 <button
                   onClick={Swap}
                   className="rounded-lg bg-[#89F3A7] text-black font-medium p-3 flex w-2/3 justify-center"

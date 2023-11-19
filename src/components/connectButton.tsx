@@ -80,7 +80,7 @@ const ConnectButton = (props: any) => {
   useEffect(() => {
     const isValid = pb.authStore.isValid;
     setIsValid(isValid);
-  }, []);
+  }, [model]);
 
   async function login(e: any) {
     e.preventDefault();
