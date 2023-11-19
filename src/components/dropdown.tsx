@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 
 interface DropdownProps {
-  label: string;
+  label: any;
   options: {
     value: string;
     icon: string;
@@ -27,7 +27,7 @@ const Dropdown: React.FC<DropdownProps> = ({
     setIsOpen(false);
   };
 
-  const handleOptionClick = (option: string) => {
+  const handleOptionClick = (option: any) => {
     onSelect(option);
     closeDropdown();
   };
@@ -57,12 +57,12 @@ const Dropdown: React.FC<DropdownProps> = ({
       <div>
         <button
           type="button"
-          className="inline-flex 	 justify-center w-64 rounded-md px-6 py-3 bg-gradient-to-r from-purple to-green text-sm font-medium text-black bg-gray-200 hover:bg-gray-100 "
+          className="inline-flex  justify-between items-center gap-3 w-64 rounded-md px-6 py-3 bg-gradient-to-r from-purple to-green text-sm font-medium text-black bg-gray-200 hover:bg-gray-100 "
           aria-haspopup="true"
           aria-expanded={isOpen}
           onClick={toggleDropdown}
         >
-          {label}
+          {label?.icon} {label?.value}
           <svg
             className="-mr-1 ml-2 h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
@@ -80,7 +80,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       </div>
 
       {isOpen && (
-        <div className="origin-top-right absolute  my-12 w-64 rounded-b-lg shadow-lg bg-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <div className="origin-top-right absolute z-50  mt-14 w-64 rounded-b-lg shadow-lg bg-gray-200 ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div
             className="divide-y divide-slate-400"
             role="menu"
@@ -95,7 +95,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                     : ""
                 } w-64 flex gap-3 items-center text-left 	 px-4 py-3 text-sm hover:bg-neutral-800 last:rounded-b-lg hover:text-white transition-all`}
                 role="menuitem"
-                onClick={() => handleOptionClick(option.value)}
+                onClick={() => handleOptionClick(option)}
               >
                 {option.icon} {option.value}
               </button>

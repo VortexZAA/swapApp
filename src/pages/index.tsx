@@ -21,7 +21,7 @@ import Ethers from "@/lib/ethers";
 import Dropdown from "@/components/dropdown";
 
 export default function App() {
-  const [dropdown, setDropdown] = useState<string>("Ethereum");
+  
   const [position, setPosition] = useState(0);
   const options: any[] = [
     {
@@ -29,7 +29,7 @@ export default function App() {
       icon: <img src={"/images/Ethereum.png"} />,
     },
     {
-      value: "Wizarre Scrol",
+      value: "Wizarre Scroll",
       icon: <img src={"/images/Wizarre Scrol.png"} />,
     },
     {
@@ -53,6 +53,7 @@ export default function App() {
       icon: <img src={"/images/Base Protocol.png"} />,
     },
   ];
+  const [dropdown, setDropdown] = useState<any>(options[0]);
   const [provider, setProvider]: any = useState(undefined);
   const [signer, setSigner]: any = useState(undefined);
   const [signerAddress, setSignerAddress]: any = useState(undefined);
@@ -151,7 +152,7 @@ export default function App() {
         <Dropdown
           label={dropdown}
           options={options}
-          selectedOption={dropdown}
+          selectedOption={dropdown.value}
           onSelect={setDropdown}
         />
 

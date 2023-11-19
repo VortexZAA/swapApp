@@ -69,34 +69,32 @@ const ConnectButton = (props: any) => {
     project_id: "project-test-2fec3cd3-c889-4027-8727-3c7a4ac05a8e",
     secret: "secret-test-QT3KOFDy5KczoEaTnrFjcqVNzag10Xz-di4=",
   });
-  const isValid = pb.authStore.isValid
+  const [isValid, setIsValid] = React.useState(false);
+
+  const model:any = isValid ? pb?.authStore?.model : "";
+  console.log("model", model);
+  async function logOut() {
+    pb.authStore.clear();
+    setIsValid(false);
+  }
+  useEffect(() => {
+    const isValid = pb.authStore.isValid;
+    setIsValid(isValid);
+  }, []);
+
   async function login(e: any) {
     e.preventDefault();
     let username = e.target.username.value;
     let password = e.target.password.value;
 
     let res = await useLogin({ email: username, password: password });
+    setIsValid(true);
+    setModal(false);
     console.log("res", res);
   }
-  const {
-    isConnected: connectMetamask,
-    signerAddress,
-    getSigner,
-    provider,
-  } = props;
-  const displayAddress = `${signerAddress?.substring(0, 10)}...`;
-  //console.log(account);
-  const wallet = useWallet();
-  const keplr = useKeplr();
-  const [accountAdress, setAccountAdress] = React.useState("");
+
   const toggleConnect = async () => {
     setModal(true);
-    /*  if (wallet.initialized) {
-      keplr.disconnect();
-    } else {
-      keplr.connect();
-      setAccountAdress(await getAddress())
-    } */
   };
   const [message, setMessage] = React.useState("");
 
@@ -146,7 +144,11 @@ const ConnectButton = (props: any) => {
       </Modal>
       <Modal title="Signup" modal={modal2} setModal={setModal2}>
         <form
-          onSubmit={CreateUser}
+          onSubmit={(e) => {
+            e.preventDefault();
+            CreateUser(e);
+            setModal2(false);
+          }}
           key={"login"}
           className="w-[375px] h-fit px-6 gap-3 flex flex-col pb-6 items-center"
         >
@@ -176,13 +178,12 @@ const ConnectButton = (props: any) => {
         </form>
       </Modal>
       <div className="p-0">
-        {wallet.initialized ? (
-          <div className="bg-white rounded-xl flex-col flex px-3 py-2">
-            <PageButton name={wallet?.address} />
-            {accountAdress}
+        {isValid ? (
+          <div className="bg-black text-white rounded-xl flex-col flex px-3 py-2">
+            {model?.accountAddress}
             <button
               className="text-red-500 hover:opacity-70 transition-colors"
-              onClick={toggleConnect}
+              onClick={logOut}
             >
               Logout
             </button>

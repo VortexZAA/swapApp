@@ -3,19 +3,9 @@ import { ethers } from "ethers";
 import { getAccountNonce } from "permissionless";
 //@ts-ignore
 import {
-  UserOperation,
-  bundlerActions,
   getSenderAddress,
-  getUserOperationHash,
-  waitForUserOperationReceipt,
-  GetUserOperationReceiptReturnType,
-  signUserOperationHashWithECDSA,
 } from "permissionless";
-//@ts-ignore
-import {
-  pimlicoBundlerActions,
-  pimlicoPaymasterActions,
-} from "permissionless/actions/pimlico";
+
 import {
   Address,
   Hash,
@@ -88,144 +78,6 @@ export async function getInitCode({ userNumber }: { userNumber: number }) {
   });
   return senderAddress;
 }
-// CALCULATE THE DETERMINISTIC SENDER ADDRESS
-let initCode = concat([
-  SIMPLE_ACCOUNT_FACTORY_ADDRESS,
-  encodeFunctionData({
-    abi: [
-      {
-        inputs: [
-          { name: "owner", type: "address" },
-          { name: "salt", type: "uint256" },
-        ],
-        name: "createAccount",
-        outputs: [{ name: "ret", type: "address" }],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
-    args: [signer.address, BigInt(0)],
-  }),
-]);
-//contracts
-const erc20PaymasterAddress = "0x65B8C906cf61eB52E12B0c68AE0f7D46E3386903";
-const usdcTokenAddress = "0x690000EF01deCE82d837B5fAa2719AE47b156697"; // USDC on Polygon Mumbai
-const uniswapRouter = "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD";
-const scrollToken = "0x00A5Aa31fe45ef1627222b9eFEf7A05f841dC1E3";
-const mock = "0x2FF7940952C5F08288ace086D8dC3bdBE6F1BCCA";
 
-const bundlerClient = createPublicClient({
-  transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${apiKey}`),
-  chain: scrollSepolia,
-}).extend(pimlicoBundlerActions);
-console.log("bundlerClient", bundlerClient);
 
-const paymasterClient = createClient({
-  // ⚠️ using v2 of the API ⚠️
-  transport: http(`https://api.pimlico.io/v2/${chain}/rpc?apikey=${apiKey}`),
-  chain: scrollSepolia,
-}).extend(pimlicoPaymasterActions);
-
-// DEPLOY THE SIMPLE WALLET
-const genereteApproveCallData = (
-  erc20TokenAddress: Address,
-  paymasterAddress: Address
-) => {
-  const approveData = encodeFunctionData({
-    abi: [
-      {
-        inputs: [
-          { name: "_to", type: "address" },
-          { name: "_amount", type: "uint256" },
-        ],
-        name: "mint",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
-    args: [erc20TokenAddress, BigInt(32000000)],
-  });
-
-  // GENERATE THE CALLDATA TO APPROVE THE USDC
-  const to = scrollToken;
-  const value = BigInt(0);
-  const data = approveData;
-
-  const callData = encodeFunctionData({
-    abi: [
-      {
-        inputs: [
-          { name: "dest", type: "address" },
-          { name: "value", type: "uint256" },
-          { name: "func", type: "bytes" },
-        ],
-        name: "execute",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
-    args: [to, value, data],
-  });
-
-  return callData;
-};
-
-type HexString = `0x${string}`;
-
-/* const genereteSwapData = (
-  erc20TokenAddress: Address,
-  paymasterAddress: Address
-) => {
-  const commands = "0x0b00";
-  const deadline = BigInt(1716654725);
-  const inputs: HexString[] = [
-    "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000009184e72a000",
-    "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000009184e72a00000000000000000000000000000000000000000000000000000006de8846537e400000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002bb4fbf271143f4fbf7b91a5ded31805e42b2208d60001f41f9840a85d5af5bf1d1762f925bdaddc4201f984000000000000000000000000000000000000000000",
-  ];
-  //const inputsAsBytes = inputs.map((input) => ethers.utils.arrayify(input));
-  const approveData = encodeFunctionData({
-    abi: [
-      {
-        inputs: [
-          { name: "commands", type: "bytes" },
-          { name: "inputs", type: "bytes[]" },
-          { name: "deadline", type: "uint256" },
-        ],
-        name: "execute",
-        outputs: [{ name: "", type: "bool" }],
-        payable: false,
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
-    args: [commands, inputs, deadline],
-  });
-
-  // GENERATE THE CALLDATA TO APPROVE THE USDC
-  const to = erc20TokenAddress;
-  const value = BigInt(0);
-  const data = approveData;
-
-  const callData = encodeFunctionData({
-    abi: [
-      {
-        inputs: [
-          { name: "dest", type: "address" },
-          { name: "value", type: "uint256" },
-          { name: "func", type: "bytes" },
-        ],
-        name: "execute",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
-    args: [to, value, data],
-  });
-
-  return callData;
-}; */
 
