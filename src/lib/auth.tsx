@@ -54,6 +54,7 @@ export async function CreateUser(e: any) {
         accountAddress: AccountAddress,
       };
       const record = await pb.collection("users").create(data);
+
       console.log("data", data);
       if (record) {
         ToastSuccess.fire("Account Address created successfully");
@@ -156,6 +157,30 @@ export default async function loginWithGoogle() {
   } catch (error) {
     console.log("error", error);
 
+    return false;
+  }
+}
+
+export async function useLogin({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) {
+  try {
+    if (!email || !password ) {
+        return;
+      }
+    const record = await pb
+      .collection("users")
+      .authWithPassword(email, password);
+    console.log("record", record);
+    ToastSuccess.fire("Successfully logged in!");
+    return record;
+  } catch (error) {
+    console.log("error", error);
+    ToastError.fire("Something went wrong, please try again later");
     return false;
   }
 }
